@@ -14,16 +14,17 @@
       <input type="text" placeholder="Year" v-model="newBook.year_pub" />
       <br />
       <select v-model="newBook.author">
-        <option v-for="author in authors" :key="author.id" :value="author.id">
+        <option v-for="author in authors" :key="author.id" :value="{ id: author.id }">
           {{ author.name }} {{ author.surname }} ({{ author.nationality }})
         </option>
       </select>
       <br />
       <h3>Genres</h3>
       <div v-for="genre in genres" :key="genre.id">
-        <input type="checkbox" :value="genre.id" v-model="newBook.genres" />
+        <input type="checkbox" :value="{ id: genre.id }" v-model="newBook.genres" />
         <label>{{ genre.name }}</label>
       </div>
+      <button type="submit" @click="storeBook">Save</button>
     </form>
     <h3>DEBUG:</h3>
     <pre>{{ newBook }}</pre>
@@ -109,7 +110,18 @@ const selectBook = (book) => {
   console.log('selectedBook', selectedBook.value)
 }
 const createBook = (book) => {
-  newBook.value = book
+  if (book == null) {
+    newBook.value = null
+    return
+  }
+
+  newBook.value = { ...book }
+}
+const storeBook = async () => {
+  await axios.post('http://localhost:8080/api/v1/book', newBook.value)
+
+  createBook(null)
+  init()
 }
 
 onMounted(init)
